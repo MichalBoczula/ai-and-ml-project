@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 
 
 def save_plots(df: pd.DataFrame, output_dir: Path) -> None:
@@ -26,6 +30,24 @@ def save_plots(df: pd.DataFrame, output_dir: Path) -> None:
     fig.suptitle("Pulsar dataset histograms")
     fig.savefig(output_dir / "histograms.png", dpi=150)
     plt.close(fig)
+
+
+def split_dataset(df: pd.DataFrame, *, test_size: float):
+    X = df.drop(columns="target_class")
+    y = df["target_class"]
+    return train_test_split(X, y, test_size=test_size, random_state=42, stratify=y)
+
+
+def predict_with_svc(
+    X_train: pd.DataFrame, y_train: pd.Series, X_test: pd.DataFrame
+) -> np.ndarray:
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+
+    svc = SVC()
+    svc.fit(X_train_scaled, y_train)
+    return svc.predict(X_test_scaled)
 
 
 def main() -> None:
@@ -69,6 +91,13 @@ def main() -> None:
     output_dir = project_dir / "plots"
     save_plots(df, output_dir)
     print(f"\nPlots saved to {output_dir}")
+
+    X_train, X_test, y_train, y_test = split_dataset(df, test_size=0.2)
+    y_pred = predict_with_svc(X_train, y_train, X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+
+    print(f"\nTraining rows: {len(y_train)}, test rows: {len(y_test)}")
+    print(f"SVC test accuracy: {accuracy:.2%}")
 
 
 if __name__ == "__main__":
