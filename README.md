@@ -33,3 +33,9 @@ The script prints the target class counts, missing values by column, and descrip
 ## Classification
 
 The script splits the dataset into training (80%) and test (20%) sets while preserving the class proportions. It fits `StandardScaler` on the training features and uses that scaler for the test features. It then trains a default `SVC` and prints the test accuracy.
+
+Run the stratification tests from the repository root to compare the 90/10, 85/15, 80/20, and 75/25 splits. Each test prints the partition sizes, test class counts, and SVC accuracy.
+
+```bash
+python -m unittest discover -s tests -v
+```

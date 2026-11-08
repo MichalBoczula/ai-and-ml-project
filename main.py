@@ -32,6 +32,24 @@ def save_plots(df: pd.DataFrame, output_dir: Path) -> None:
     plt.close(fig)
 
 
+def split_dataset(df: pd.DataFrame, *, test_size: float):
+    X = df.drop(columns="target_class")
+    y = df["target_class"]
+    return train_test_split(X, y, test_size=test_size, random_state=42, stratify=y)
+
+
+def predict_with_svc(
+    X_train: pd.DataFrame, y_train: pd.Series, X_test: pd.DataFrame
+) -> np.ndarray:
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+
+    svc = SVC()
+    svc.fit(X_train_scaled, y_train)
+    return svc.predict(X_test_scaled)
+
+
 def main() -> None:
     project_dir = Path(__file__).resolve().parent
     dataset_path = project_dir / "data" / "pulsar_stars.csv"
@@ -74,19 +92,8 @@ def main() -> None:
     save_plots(df, output_dir)
     print(f"\nPlots saved to {output_dir}")
 
-    X = df.drop(columns="target_class")
-    y = df["target_class"]
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
-
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
-
-    svc = SVC()
-    svc.fit(X_train, y_train)
-    y_pred = svc.predict(X_test)
+    X_train, X_test, y_train, y_test = split_dataset(df, test_size=0.2)
+    y_pred = predict_with_svc(X_train, y_train, X_test)
     accuracy = accuracy_score(y_test, y_pred)
 
     print(f"\nTraining rows: {len(y_train)}, test rows: {len(y_test)}")
