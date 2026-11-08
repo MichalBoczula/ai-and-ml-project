@@ -6,8 +6,31 @@ import pandas as pd
 import seaborn as sns
 
 
+def save_plots(df: pd.DataFrame, output_dir: Path) -> None:
+    output_dir.mkdir(exist_ok=True)
+
+    features = df.drop(columns="target_class")
+    fig, axes = plt.subplots(2, 4, figsize=(15, 7), layout="constrained")
+    for column, ax in zip(features.columns, axes.flat, strict=True):
+        sns.boxplot(data=features, x=column, ax=ax)
+    fig.suptitle("Pulsar feature boxplots")
+    fig.savefig(output_dir / "boxplots.png", dpi=150)
+    plt.close(fig)
+
+    fig, axes = plt.subplots(3, 3, figsize=(14, 10), layout="constrained")
+    for column, ax in zip(df.columns, axes.flat, strict=True):
+        is_target = column == "target_class"
+        sns.histplot(data=df, x=column, bins=30, discrete=is_target, ax=ax)
+        if is_target:
+            ax.set_xticks([0, 1])
+    fig.suptitle("Pulsar dataset histograms")
+    fig.savefig(output_dir / "histograms.png", dpi=150)
+    plt.close(fig)
+
+
 def main() -> None:
-    dataset_path = Path(__file__).resolve().parent / "data" / "pulsar_stars.csv"
+    project_dir = Path(__file__).resolve().parent
+    dataset_path = project_dir / "data" / "pulsar_stars.csv"
     df = pd.read_csv(dataset_path)
 
     print(f"DataFrame shape: {df.shape}")
@@ -30,6 +53,22 @@ def main() -> None:
 
     print("\nColumn names after cleanup:")
     print(df.columns.tolist())
+
+    print("\nTarget class counts:")
+    target_counts = df["target_class"].value_counts().reindex([0, 1], fill_value=0)
+    print(target_counts.to_string())
+
+    print("\nMissing values by column:")
+    missing_values = df.isna().sum()
+    print(missing_values.to_string())
+    print(f"Total missing values: {missing_values.sum()}")
+
+    print("\nDescriptive statistics:")
+    print(df.describe().to_string())
+
+    output_dir = project_dir / "plots"
+    save_plots(df, output_dir)
+    print(f"\nPlots saved to {output_dir}")
 
 
 if __name__ == "__main__":

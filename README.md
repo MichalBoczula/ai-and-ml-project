@@ -25,3 +25,7 @@ python main.py
 ## PyCharm
 
 Open the repository folder and select the existing `.venv` as the project interpreter. Choose `.venv/Scripts/python.exe` on Windows or `.venv/bin/python` on macOS and Linux. After installing the dependencies as shown above, run `main.py`.
+
+## Exploration output
+
+The script prints the target class counts, missing values by column, and descriptive statistics. It saves a boxplot for each of the eight features in `plots/boxplots.png` and a histogram for every column, including `target_class`, in `plots/histograms.png`.
