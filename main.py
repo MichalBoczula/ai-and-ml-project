@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 
 
 def save_plots(df: pd.DataFrame, output_dir: Path) -> None:
@@ -69,6 +73,24 @@ def main() -> None:
     output_dir = project_dir / "plots"
     save_plots(df, output_dir)
     print(f"\nPlots saved to {output_dir}")
+
+    X = df.drop(columns="target_class")
+    y = df["target_class"]
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    svc = SVC()
+    svc.fit(X_train, y_train)
+    y_pred = svc.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+
+    print(f"\nTraining rows: {len(y_train)}, test rows: {len(y_test)}")
+    print(f"SVC test accuracy: {accuracy:.2%}")
 
 
 if __name__ == "__main__":

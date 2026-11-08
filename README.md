@@ -29,3 +29,7 @@ Open the repository folder and select the existing `.venv` as the project interp
 ## Exploration output
 
 The script prints the target class counts, missing values by column, and descriptive statistics. It saves a boxplot for each of the eight features in `plots/boxplots.png` and a histogram for every column, including `target_class`, in `plots/histograms.png`.
+
+## Classification
+
+The script splits the dataset into training (80%) and test (20%) sets while preserving the class proportions. It fits `StandardScaler` on the training features and uses that scaler for the test features. It then trains a default `SVC` and prints the test accuracy.
